@@ -19,6 +19,17 @@ interface RoadLineParams {
   lineColor?: number;
 }
 
+type Direction = 'left' | 'right' | 'top' | 'bottom';
+interface RoadLightParams {
+  app: PIXI.Application;
+  roadWidth: number;
+  width: number;
+  height: number;
+  lightAlpha: number;
+  position: Direction;
+  dispatch: any;
+}
+
 export const createRoad = ({
   app,
   x,
@@ -73,4 +84,120 @@ export const roadLine = ({
     borderlineColumn.lineTo(stageWidth / 2, startColumn - lineSpace);
     app.stage.addChild(borderlineColumn);
   }
+};
+
+export const roadLight = ({
+  app,
+  roadWidth,
+  width,
+  height,
+  dispatch,
+  position = 'right',
+  lightAlpha,
+}: RoadLightParams) => {
+  let lightLength = 10;
+  let lightSpace = (roadWidth - lightLength * 3) / 3;
+  let lights = new PIXI.Container();
+  const lightColorArr = [0x13ee13, 0xfc0c0c, 0xd8e413];
+
+  let startX = (width + roadWidth) / 2 - lightLength;
+  let startY = (height - roadWidth) / 2 + lightLength / 2;
+
+  if (position === 'left') {
+    startX = (width - roadWidth) / 2 + lightLength;
+  } else if (position === 'top' || position === 'bottom') {
+    startX = (width - roadWidth) / 2 + lightLength / 2;
+    if (position === 'bottom') {
+      startY = (height + roadWidth) / 2 - lightLength / 2;
+    }
+  }
+
+  lightColorArr.forEach((color, index) => {
+    const light = new PIXI.Graphics();
+    light.beginFill(color);
+    light.drawEllipse(
+      position !== 'top' && position !== 'bottom'
+        ? startX
+        : startX + lightSpace * (index + 1),
+      position !== 'top' && position !== 'bottom'
+        ? startY + lightSpace * (index + 1)
+        : startY,
+      position !== 'top' && position !== 'bottom'
+        ? lightLength / 2
+        : lightLength,
+      position !== 'top' && position !== 'bottom'
+        ? lightLength
+        : lightLength / 2
+    ); //x,y,w、h
+    light.endFill();
+    light.alpha = lightAlpha;
+    lights.addChild(light);
+  });
+
+  dispatch({ type: 'addLight', payload: lights });
+
+  //   const greenLight = new PIXI.Graphics();
+  //   greenLight.beginFill(0x13ee13); // 74f274
+  //   greenLight.drawEllipse(
+  //     startX,
+  //     startY + lightSpace,
+  //     lightLength / 2,
+  //     lightLength
+  //   ); //x,y,w、h
+  //   greenLight.endFill();
+  //   greenLight.alpha = lightAlpha;
+
+  //   const redLight = new PIXI.Graphics();
+  //   redLight.lineStyle(0, 0xaaaaaa, 1);
+  //   redLight.beginFill(0xfc0c0c); // ff0000
+  //   redLight.drawEllipse(
+  //     startX,
+  //     startY + lightSpace * 2,
+  //     lightLength / 2,
+  //     lightLength
+  //   ); //x,y,w、h
+  //   redLight.endFill();
+  //   redLight.alpha = lightAlpha;
+
+  //   const yellowLight = new PIXI.Graphics();
+  //   yellowLight.beginFill(0xd8e413); // eaea08
+  //   yellowLight.drawEllipse(
+  //     startX,
+  //     startY + lightSpace * 3,
+  //     lightLength / 2,
+  //     lightLength
+  //   ); //x,y,w、h
+  //   yellowLight.endFill();
+  //   yellowLight.alpha = lightAlpha;
+
+  //   lights.addChild(greenLight);
+  //   lights.addChild(redLight);
+  //   lights.addChild(yellowLight);
+  app.stage.addChild(lights);
+
+  // lights.children[0].alpha = 1;
+  // lights.children[1].alpha = 1;
+  // lights.children[2].alpha = 1;
+};
+
+export const createLights = ({
+  app,
+  roadWidth,
+  width,
+  height,
+  dispatch,
+  lightAlpha,
+}: Omit<RoadLightParams, 'position'>) => {
+  let arr: Direction[] = ['left', 'right', 'top', 'bottom'];
+  arr.forEach((direction) => {
+    roadLight({
+      app,
+      roadWidth,
+      width,
+      height,
+      position: direction,
+      dispatch,
+      lightAlpha,
+    });
+  });
 };

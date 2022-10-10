@@ -21,5 +21,6 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react/no-unknown-property': 'off',
     'prefer-const': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
   },
 };
