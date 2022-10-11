@@ -30,6 +30,10 @@ interface RoadLightParams {
   dispatch: any;
 }
 
+/**
+ * 创建道路
+ * @param param0
+ */
 export const createRoad = ({
   app,
   x,
@@ -46,6 +50,10 @@ export const createRoad = ({
   app.stage.addChild(borderline); //添加到舞台中
 };
 
+/**
+ * 创建道路线
+ * @param param0
+ */
 export const roadLine = ({
   app,
   stageWidth,
@@ -135,51 +143,13 @@ export const roadLight = ({
   });
 
   dispatch({ type: 'addLight', payload: lights });
-
-  //   const greenLight = new PIXI.Graphics();
-  //   greenLight.beginFill(0x13ee13); // 74f274
-  //   greenLight.drawEllipse(
-  //     startX,
-  //     startY + lightSpace,
-  //     lightLength / 2,
-  //     lightLength
-  //   ); //x,y,w、h
-  //   greenLight.endFill();
-  //   greenLight.alpha = lightAlpha;
-
-  //   const redLight = new PIXI.Graphics();
-  //   redLight.lineStyle(0, 0xaaaaaa, 1);
-  //   redLight.beginFill(0xfc0c0c); // ff0000
-  //   redLight.drawEllipse(
-  //     startX,
-  //     startY + lightSpace * 2,
-  //     lightLength / 2,
-  //     lightLength
-  //   ); //x,y,w、h
-  //   redLight.endFill();
-  //   redLight.alpha = lightAlpha;
-
-  //   const yellowLight = new PIXI.Graphics();
-  //   yellowLight.beginFill(0xd8e413); // eaea08
-  //   yellowLight.drawEllipse(
-  //     startX,
-  //     startY + lightSpace * 3,
-  //     lightLength / 2,
-  //     lightLength
-  //   ); //x,y,w、h
-  //   yellowLight.endFill();
-  //   yellowLight.alpha = lightAlpha;
-
-  //   lights.addChild(greenLight);
-  //   lights.addChild(redLight);
-  //   lights.addChild(yellowLight);
   app.stage.addChild(lights);
-
-  // lights.children[0].alpha = 1;
-  // lights.children[1].alpha = 1;
-  // lights.children[2].alpha = 1;
 };
 
+/**
+ * 创建交通灯
+ * @param param0
+ */
 export const createLights = ({
   app,
   roadWidth,
