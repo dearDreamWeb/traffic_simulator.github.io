@@ -17,18 +17,33 @@ interface TextureCacheObj {
   bottom: PIXI.Texture<PIXI.Resource>;
 }
 
+interface Sprite extends PIXI.Sprite {
+  state?: 'running' | 'stopping';
+}
+
 const WIDTH = 800;
 const HEIGHT = 800;
 const ROADWIDTH = 100;
 const LIGHTALPHA = 0.06;
-const REDLIGHTTIMER = 6; // 红灯秒数
+const REDLIGHTTIMER = 5; // 红灯秒数
+const CATLENGTH = 50; // 车长
+
+class ListNode {
+  val: Sprite;
+  next: ListNode | null;
+  constructor(val: Sprite) {
+    this.val = val;
+    this.next = null;
+  }
+}
 
 function App() {
   let [app, setApp] = useState<PIXI.Application>();
   const [state, dispatch] = useReducer(reducer, initData);
-  let isRowGreen = useRef(true).current;
+  let isRowGreen = useRef(true);
   let timerCount = useRef(0).current;
   let [texture, setTexture] = useState<TextureCacheObj>();
+  let catList = useRef<ListNode | null>(null);
 
   useEffect(() => {
     let _app = new PIXI.Application({
@@ -57,9 +72,15 @@ function App() {
     }
     const { lightsData } = state;
     if (lightsData.length === 4) {
+      // TODO 换成 requestAnimationFrame
       setInterval(() => {
+        timerCount++;
+        if (timerCount > REDLIGHTTIMER) {
+          isRowGreen.current = !isRowGreen.current;
+          timerCount = 0;
+        }
         let isDiff3 = REDLIGHTTIMER - timerCount;
-        if (isRowGreen) {
+        if (isRowGreen.current) {
           for (let i = 2; i < 4; i++) {
             for (let j = 0; j < 3; j++) {
               lightsData[i].children[j].alpha = j === 1 ? 1 : LIGHTALPHA;
@@ -91,11 +112,6 @@ function App() {
             }
           }
         }
-        timerCount++;
-        if (timerCount > REDLIGHTTIMER) {
-          isRowGreen = !isRowGreen;
-          timerCount = 0;
-        }
       }, 1000);
     }
   }, [app, state.lightsData]);
@@ -104,7 +120,39 @@ function App() {
     if (!app || !texture) {
       return;
     }
-    loadSprite('left', 40, (HEIGHT - ROADWIDTH) / 2);
+    loadSprite(
+      'left',
+      WIDTH - CATLENGTH / 2,
+      (HEIGHT - ROADWIDTH) / 2 + ROADWIDTH / 4
+    );
+    loadSprite(
+      'left',
+      WIDTH + CATLENGTH * 2,
+      (HEIGHT - ROADWIDTH) / 2 + ROADWIDTH / 4
+    );
+    let roadLightX = (WIDTH + ROADWIDTH + CATLENGTH) / 2;
+    app.ticker.add(() => {
+      let copyList = catList.current;
+      let lastNode = null;
+      while (copyList) {
+        const sprite = copyList.val;
+        if (roadLightX - sprite.x <= 2 && roadLightX - sprite.x >= 0) {
+          if (isRowGreen.current) {
+            sprite.x -= 1;
+          }
+        } else {
+          sprite.x -= 1;
+        }
+        if (sprite.x <= 0) {
+          return;
+        }
+        if (lastNode && Math.abs(sprite.x - lastNode.x) <= CATLENGTH + 3) {
+          sprite.x = lastNode.x + CATLENGTH + 3;
+        }
+        lastNode = sprite;
+        copyList = copyList.next;
+      }
+    });
   }, [app, texture]);
 
   const init = () => {
@@ -173,18 +221,24 @@ function App() {
     if (!app) {
       return;
     }
-    let sprite = new PIXI.Sprite(texture![direction]);
+    let sprite = new PIXI.Sprite(texture![direction]) as Sprite;
     sprite.x = x;
     sprite.y = y;
     sprite.anchor.set(0.5);
+    sprite.state = 'running';
     if (direction === 'left' || direction === 'right') {
-      sprite.width = 80;
-      sprite.height = ROADWIDTH / 2 - 5;
+      sprite.width = CATLENGTH;
+      sprite.height = CATLENGTH / 1.5;
     } else {
-      sprite.width = ROADWIDTH / 2 - 5;
-      sprite.height = 80;
+      sprite.width = CATLENGTH / 1.5;
+      sprite.height = CATLENGTH;
     }
     app.stage.addChild(sprite);
+    if (catList.current) {
+      catList.current.next = new ListNode(sprite);
+    } else {
+      catList.current = new ListNode(sprite);
+    }
   };
 
   return (
