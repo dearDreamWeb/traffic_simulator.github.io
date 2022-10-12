@@ -196,7 +196,7 @@ function App() {
         if (lastNode && Math.abs(sprite.x - lastNode.x) <= CATLENGTH + 4) {
           sprite.x = lastNode.x + CATLENGTH + 4;
           if (sprite.state !== 'slowDown') {
-            sprite.speed -= Math.random() * sprite.speed;
+            sprite.speed = lastNode.speed - Math.random() * lastNode.speed;
             sprite.state = 'slowDown';
           }
           isStop = true;
