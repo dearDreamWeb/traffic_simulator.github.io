@@ -18,7 +18,9 @@ interface TextureCacheObj {
 }
 
 interface Sprite extends PIXI.Sprite {
-  state?: 'running' | 'stopping';
+  state?: 'accelerate' | 'slowDown' | 'normal'; // 加速，减速，正常
+  speed: number;
+  id: number;
 }
 
 const WIDTH = 800;
@@ -73,7 +75,20 @@ function App() {
     const { lightsData } = state;
     if (lightsData.length === 4) {
       // TODO 换成 requestAnimationFrame
-      setInterval(() => {
+      lightAnimation(lightsData);
+    }
+  }, [app, state.lightsData]);
+
+  /**
+   * 红绿灯动画
+   */
+  const lightAnimation = (lightsData: any) => {
+    let startTime = performance.now();
+    function animation() {
+      let endTime = performance.now();
+      // 一秒
+      if (endTime - startTime >= 1000) {
+        startTime = endTime;
         timerCount++;
         if (timerCount > REDLIGHTTIMER) {
           isRowGreen.current = !isRowGreen.current;
@@ -112,9 +127,12 @@ function App() {
             }
           }
         }
-      }, 1000);
+      }
+
+      requestAnimationFrame(animation);
     }
-  }, [app, state.lightsData]);
+    animation();
+  };
 
   useEffect(() => {
     if (!app || !texture) {
@@ -123,32 +141,79 @@ function App() {
     loadSprite(
       'left',
       WIDTH - CATLENGTH / 2,
+      // WIDTH + CATLENGTH * 2,
       (HEIGHT - ROADWIDTH) / 2 + ROADWIDTH / 4
     );
+
     loadSprite(
       'left',
       WIDTH + CATLENGTH * 2,
       (HEIGHT - ROADWIDTH) / 2 + ROADWIDTH / 4
     );
+
+    loadSprite(
+      'left',
+      WIDTH + CATLENGTH * 3,
+      (HEIGHT - ROADWIDTH) / 2 + ROADWIDTH / 4
+    );
+
+    loadSprite(
+      'left',
+      WIDTH + CATLENGTH * 4,
+      (HEIGHT - ROADWIDTH) / 2 + ROADWIDTH / 4
+    );
+
     let roadLightX = (WIDTH + ROADWIDTH + CATLENGTH) / 2;
     app.ticker.add(() => {
       let copyList = catList.current;
+      // 上一节点
       let lastNode = null;
       while (copyList) {
         const sprite = copyList.val;
-        if (roadLightX - sprite.x <= 2 && roadLightX - sprite.x >= 0) {
-          if (isRowGreen.current) {
-            sprite.x -= 1;
+        // 是否停车
+        let isStop = false;
+        // 判断是否在红绿灯右侧 5 距离大小，在判断是否为红灯
+        if (sprite.x - roadLightX <= 5 && sprite.x - roadLightX >= 0) {
+          if (!isRowGreen.current) {
+            isStop = true;
           }
-        } else {
-          sprite.x -= 1;
         }
+        // 判断汽车是否走出画面，链表中删除，并且从舞台中删除，在添加一辆车
         if (sprite.x <= 0) {
-          return;
+          catList.current = catList.current!.next;
+          app?.stage.removeChild(sprite);
+          if (catList.current) {
+            catList.current.val.speed = Math.random() * 1 + 3;
+          }
+          loadSprite(
+            'left',
+            WIDTH - CATLENGTH / 2,
+            // WIDTH + CATLENGTH * 2,
+            (HEIGHT - ROADWIDTH) / 2 + ROADWIDTH / 4
+          );
         }
-        if (lastNode && Math.abs(sprite.x - lastNode.x) <= CATLENGTH + 3) {
-          sprite.x = lastNode.x + CATLENGTH + 3;
+        // 判断距离上一辆车的距离是否小于3，小于3就等于3
+        if (lastNode && Math.abs(sprite.x - lastNode.x) <= CATLENGTH + 4) {
+          sprite.x = lastNode.x + CATLENGTH + 4;
+          if (sprite.state !== 'slowDown') {
+            sprite.speed -= Math.random() * sprite.speed;
+            sprite.state = 'slowDown';
+          }
+          isStop = true;
+        } else if (
+          lastNode &&
+          Math.abs(sprite.x - lastNode.x) > CATLENGTH + 30
+        ) {
+          if (sprite.state !== 'accelerate') {
+            sprite.speed = sprite.speed + Math.random() * (4 - sprite.speed);
+            sprite.state = 'accelerate';
+          }
         }
+
+        if (!isStop) {
+          sprite.x -= sprite.speed;
+        }
+
         lastNode = sprite;
         copyList = copyList.next;
       }
@@ -224,8 +289,12 @@ function App() {
     let sprite = new PIXI.Sprite(texture![direction]) as Sprite;
     sprite.x = x;
     sprite.y = y;
+    sprite.id = Math.floor(Math.random() * 999999);
+    sprite.speed = !catList.current
+      ? Math.random() * 1 + 3
+      : 1 + Math.random() * 3;
     sprite.anchor.set(0.5);
-    sprite.state = 'running';
+    sprite.state = 'normal';
     if (direction === 'left' || direction === 'right') {
       sprite.width = CATLENGTH;
       sprite.height = CATLENGTH / 1.5;
@@ -234,8 +303,14 @@ function App() {
       sprite.height = CATLENGTH;
     }
     app.stage.addChild(sprite);
+
+    // 链表最后添加节点
     if (catList.current) {
-      catList.current.next = new ListNode(sprite);
+      let current = catList.current;
+      while (current.next) {
+        current = current.next!;
+      }
+      current.next = new ListNode(sprite);
     } else {
       catList.current = new ListNode(sprite);
     }
