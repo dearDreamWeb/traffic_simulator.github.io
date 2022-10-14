@@ -155,20 +155,30 @@ function App() {
     }
     addCar('left');
     addCar('left');
-    addCar('left');
-    addCar('left');
 
     addCar('right');
     addCar('right');
     addCar('right');
+
+    addCar('top');
+    addCar('top');
+    addCar('top');
+
+    addCar('bottom');
+    addCar('bottom');
+    addCar('bottom');
 
     interface RoadLightObj {
       left: number;
       right: number;
+      top: number;
+      bottom: number;
     }
     let roadLightObj: RoadLightObj = {
       left: (WIDTH + ROADWIDTH + CARLENGTH) / 2,
       right: (WIDTH - ROADWIDTH - CARLENGTH) / 2,
+      top: (HEIGHT + ROADWIDTH + CARLENGTH) / 2,
+      bottom: (HEIGHT - ROADWIDTH - CARLENGTH) / 2,
     };
     app.ticker.add(() => {
       for (let key in carData.current) {
@@ -184,21 +194,27 @@ function App() {
           // 是否停车
           let isStop = false;
           // 判断是否在红绿灯 5 距离大小，在判断是否为红灯
-          if (key === 'left') {
+          if (key === 'left' || key === 'top') {
             if (
               sprite[coordinate] - roadLightX <= 5 &&
               sprite[coordinate] - roadLightX >= 0
             ) {
-              if (!isRowGreen.current) {
+              if (key === 'left' && !isRowGreen.current) {
+                isStop = true;
+              }
+              if (key === 'top' && isRowGreen.current) {
                 isStop = true;
               }
             }
-          } else if (key === 'right') {
+          } else if (key === 'right' || key === 'bottom') {
             if (
               roadLightX - sprite[coordinate] <= 5 &&
               roadLightX - sprite[coordinate] >= 0
             ) {
-              if (!isRowGreen.current) {
+              if (key === 'right' && !isRowGreen.current) {
+                isStop = true;
+              }
+              if (key === 'bottom' && isRowGreen.current) {
                 isStop = true;
               }
             }
@@ -212,9 +228,9 @@ function App() {
             Math.abs(sprite[coordinate] - lastNode[coordinate]) <= CARLENGTH + 4
           ) {
             sprite[coordinate] =
-              key === 'left'
+              key === 'left' || key === 'top'
                 ? lastNode[coordinate] + CARLENGTH + 4
-                : key === 'right'
+                : key === 'right' || key === 'bottom'
                 ? lastNode[coordinate] - CARLENGTH - 4
                 : sprite[coordinate];
             if (sprite.state !== 'slowDown') {
@@ -352,7 +368,22 @@ function App() {
           } else {
             sprite.x = -CARLENGTH / 2;
           }
-          console.log(sprite.x, sprite.y);
+          break;
+        case 'top':
+          sprite.x = WIDTH / 2 + ROADWIDTH / 4;
+          if (current.val.y >= HEIGHT + CARLENGTH / 2) {
+            sprite.y = current.val.y + CARLENGTH * 1.5;
+          } else {
+            sprite.y = HEIGHT + CARLENGTH / 2;
+          }
+          break;
+        case 'bottom':
+          sprite.x = WIDTH / 2 - ROADWIDTH / 4;
+          if (current.val.y <= -CARLENGTH / 2) {
+            sprite.y = current.val.y - CARLENGTH * 1.5;
+          } else {
+            sprite.y = -CARLENGTH / 2;
+          }
           break;
       }
       current.next = new ListNode(sprite);
@@ -363,6 +394,12 @@ function App() {
       } else if (direction === 'right') {
         sprite.y = HEIGHT / 2 + ROADWIDTH / 4;
         sprite.x = -CARLENGTH / 2;
+      } else if (direction === 'top') {
+        sprite.x = WIDTH / 2 + ROADWIDTH / 4;
+        sprite.y = HEIGHT + CARLENGTH / 2;
+      } else if (direction === 'bottom') {
+        sprite.x = WIDTH / 2 - ROADWIDTH / 4;
+        sprite.y = -CARLENGTH / 2;
       }
       carData.current[direction] = new ListNode(sprite);
     }
@@ -385,7 +422,7 @@ function App() {
         isOver = sprite.y <= -CARLENGTH / 2;
         break;
       case 'bottom':
-        isOver = sprite.y <= HEIGHT + CARLENGTH / 2;
+        isOver = sprite.y >= HEIGHT + CARLENGTH / 2;
         break;
     }
     if (!isOver) {
