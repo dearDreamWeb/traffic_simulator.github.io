@@ -54,7 +54,6 @@ function App() {
   let isRowGreen = useRef(true);
   let timerCount = useRef(0).current;
   let [texture, setTexture] = useState<TextureCacheObj>();
-  let carList = useRef<ListNode | null>(null);
   let carData = useRef<CarData>({
     left: null,
     right: null,
@@ -199,6 +198,7 @@ function App() {
               sprite[coordinate] - roadLightX <= 5 &&
               sprite[coordinate] - roadLightX >= 0
             ) {
+              isStop = giveWay(key as Direction);
               if (key === 'left' && !isRowGreen.current) {
                 isStop = true;
               }
@@ -211,6 +211,7 @@ function App() {
               roadLightX - sprite[coordinate] <= 5 &&
               roadLightX - sprite[coordinate] >= 0
             ) {
+              isStop = giveWay(key as Direction);
               if (key === 'right' && !isRowGreen.current) {
                 isStop = true;
               }
@@ -434,6 +435,102 @@ function App() {
       carData.current[direction]!.val.speed = Math.random() * 1 + 3;
     }
     addCar(direction);
+  };
+
+  /**
+   * 是否有交叉轴的车在行驶，是否让行
+   */
+  const giveWay = (key: Direction): boolean => {
+    let flag = false;
+    let copyLeft = carData.current.left;
+    let copyRight = carData.current.right;
+    let copyTop = carData.current.top;
+    let copyBottom = carData.current.bottom;
+    // 纵轴交通灯范围
+    let columnArea = {
+      top: (HEIGHT - ROADWIDTH - CARLENGTH) / 2,
+      bottom: (HEIGHT + ROADWIDTH + CARLENGTH) / 2,
+    };
+
+    // 横轴交通灯范围
+    let rowArea = {
+      left: (WIDTH - ROADWIDTH - CARLENGTH) / 2,
+      right: (WIDTH + ROADWIDTH + CARLENGTH) / 2,
+    };
+
+    if (key === 'left' || key === 'right') {
+      while (copyTop || copyBottom) {
+        if (copyTop) {
+          if (
+            isExists({
+              point: copyTop.val.y,
+              start: columnArea.top,
+              end: columnArea.bottom,
+            })
+          ) {
+            flag = true;
+          }
+          copyTop = copyTop.next;
+        }
+        if (copyBottom) {
+          if (
+            isExists({
+              point: copyBottom.val.y,
+              start: columnArea.top,
+              end: columnArea.bottom,
+            })
+          ) {
+            flag = true;
+          }
+          copyBottom = copyBottom.next;
+        }
+      }
+    } else {
+      while (copyLeft) {
+        if (copyLeft) {
+          if (
+            isExists({
+              point: copyLeft.val.x,
+              start: rowArea.left,
+              end: rowArea.right,
+            })
+          ) {
+            flag = true;
+          }
+          copyLeft = copyLeft.next;
+        }
+        if (copyRight) {
+          if (
+            isExists({
+              point: copyRight.val.x,
+              start: rowArea.left,
+              end: rowArea.right,
+            })
+          ) {
+            flag = true;
+          }
+          copyRight = copyRight.next;
+        }
+      }
+    }
+    return flag;
+  };
+
+  /**
+   * 是否在范围内
+   * @param param0
+   * @returns
+   */
+  const isExists = ({
+    point,
+    start,
+    end,
+  }: {
+    point: number;
+    start: number;
+    end: number;
+  }) => {
+    return point > start && point < end;
   };
 
   return (
