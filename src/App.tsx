@@ -7,14 +7,18 @@ import catYellowLeft from './assets/images/cart_yellow_left.png';
 import catYellowRight from './assets/images/cart_yellow_right.png';
 import catYellowTop from './assets/images/cart_yellow_top.png';
 import catYellowBottom from './assets/images/cart_yellow_bottom.png';
+import catGrayLeft from './assets/images/cart_gray_left.png';
+import catGrayRight from './assets/images/cart_gray_right.png';
+import catGrayTop from './assets/images/cart_gray_top.png';
+import catGrayBottom from './assets/images/cart_gray_bottom.png';
 
 const { createRoad, roadLine, createLights } = utils;
 
 interface TextureCacheObj {
-  left: PIXI.Texture<PIXI.Resource>;
-  right: PIXI.Texture<PIXI.Resource>;
-  top: PIXI.Texture<PIXI.Resource>;
-  bottom: PIXI.Texture<PIXI.Resource>;
+  left: PIXI.Texture<PIXI.Resource>[];
+  right: PIXI.Texture<PIXI.Resource>[];
+  top: PIXI.Texture<PIXI.Resource>[];
+  bottom: PIXI.Texture<PIXI.Resource>[];
 }
 
 interface Sprite extends PIXI.Sprite {
@@ -310,14 +314,30 @@ function App() {
       .add('catYellowLeft', catYellowLeft)
       .add('catYellowRight', catYellowRight)
       .add('catYellowTop', catYellowTop)
-      .add('catYellowBottom', catYellowBottom);
+      .add('catYellowBottom', catYellowBottom)
+      .add('catGrayLeft', catGrayLeft)
+      .add('catGrayRight', catGrayRight)
+      .add('catGrayTop', catGrayTop)
+      .add('catGrayBottom', catGrayBottom);
     loaders.load();
     loaders.onComplete.add(() => {
       setTexture({
-        left: loaders.resources.catYellowLeft.texture!,
-        right: loaders.resources.catYellowRight.texture!,
-        top: loaders.resources.catYellowTop.texture!,
-        bottom: loaders.resources.catYellowBottom.texture!,
+        left: [
+          loaders.resources.catYellowLeft.texture!,
+          loaders.resources.catGrayLeft.texture!,
+        ],
+        right: [
+          loaders.resources.catYellowRight.texture!,
+          loaders.resources.catGrayRight.texture!,
+        ],
+        top: [
+          loaders.resources.catYellowTop.texture!,
+          loaders.resources.catGrayTop.texture!,
+        ],
+        bottom: [
+          loaders.resources.catYellowBottom.texture!,
+          loaders.resources.catGrayBottom.texture!,
+        ],
       });
     });
   };
@@ -331,7 +351,9 @@ function App() {
     if (!app) {
       return;
     }
-    let sprite = new PIXI.Sprite(texture![direction]) as Sprite;
+    let sprite = new PIXI.Sprite(
+      texture![direction][Math.floor(Math.random() * 2)]
+    ) as Sprite;
     sprite.id = Math.floor(Math.random() * 999999);
     sprite.speed = !carData.current[direction]
       ? Math.random() * 1 + 3
