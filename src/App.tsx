@@ -2,7 +2,13 @@ import { useState, useEffect, useRef, useReducer } from 'react';
 import styles from './App.module.less';
 import * as PIXI from 'pixi.js';
 import utils from './utils';
-import { reducer, ContextData, initData, InitData } from './reducer/useReducer'; //引入useReducer文件
+import {
+  reducer,
+  ContextData,
+  initData,
+  StateProps,
+} from './reducer/useReducer'; //引入useReducer文件
+import ControlPanel from './components/controlPanel/controlPanel';
 import catYellowLeft from './assets/images/cart_yellow_left.png';
 import catYellowRight from './assets/images/cart_yellow_right.png';
 import catYellowTop from './assets/images/cart_yellow_top.png';
@@ -11,8 +17,9 @@ import catGrayLeft from './assets/images/cart_gray_left.png';
 import catGrayRight from './assets/images/cart_gray_right.png';
 import catGrayTop from './assets/images/cart_gray_top.png';
 import catGrayBottom from './assets/images/cart_gray_bottom.png';
+// import ground from './assets/images/road.jpg';
 
-const { createRoad, roadLine, createLights } = utils;
+const { createRoad, roadLine, createLights, carFilterColor } = utils;
 
 interface TextureCacheObj {
   left: PIXI.Texture<PIXI.Resource>[];
@@ -21,14 +28,21 @@ interface TextureCacheObj {
   bottom: PIXI.Texture<PIXI.Resource>[];
 }
 
-interface Sprite extends PIXI.Sprite {
+export interface Sprite extends PIXI.Sprite {
   state?: 'accelerate' | 'slowDown' | 'normal'; // 加速，减速，正常
   speed: number;
   id: number;
 }
 
-const WIDTH = 800;
-const HEIGHT = 800;
+interface RoadLightObj {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+const WIDTH = 1000;
+const HEIGHT = 700;
 const ROADWIDTH = 100;
 const LIGHTALPHA = 0.06;
 const REDLIGHTTIMER = 5; // 红灯秒数
@@ -53,8 +67,8 @@ interface CarData {
 type Direction = 'left' | 'right' | 'top' | 'bottom';
 
 function App() {
-  let [app, setApp] = useState<PIXI.Application>();
   const [state, dispatch] = useReducer(reducer, initData);
+  const { app } = state as StateProps;
   let isRowGreen = useRef(true);
   let timerCount = useRef(0).current;
   let [texture, setTexture] = useState<TextureCacheObj>();
@@ -74,7 +88,7 @@ function App() {
       resolution: 1,
       view: document.getElementById('mainCanvas') as HTMLCanvasElement,
     });
-    setApp(_app);
+    dispatch({ type: 'updateState', payload: { app: _app } });
   }, []);
 
   useEffect(() => {
@@ -171,18 +185,24 @@ function App() {
     addCar('bottom');
     addCar('bottom');
 
-    interface RoadLightObj {
-      left: number;
-      right: number;
-      top: number;
-      bottom: number;
+    playCar();
+  }, [app, texture]);
+
+  /***
+   * 开始启动
+   */
+  const playCar = () => {
+    if (!app || !texture) {
+      return;
     }
+
     let roadLightObj: RoadLightObj = {
       left: (WIDTH + ROADWIDTH + CARLENGTH) / 2,
       right: (WIDTH - ROADWIDTH - CARLENGTH) / 2,
       top: (HEIGHT + ROADWIDTH + CARLENGTH) / 2,
       bottom: (HEIGHT - ROADWIDTH - CARLENGTH) / 2,
     };
+
     app.ticker.add(() => {
       for (let key in carData.current) {
         let copyList = carData.current[key as keyof CarData];
@@ -266,12 +286,19 @@ function App() {
         }
       }
     });
-  }, [app, texture]);
+  };
 
-  const init = () => {
+  const init = async () => {
     if (!app) {
       return;
     }
+    // 加载地面
+    // let backgroundTexture = await createGround({ url: ground });
+    // let background = new PIXI.Sprite(backgroundTexture);
+    // background.width = WIDTH;
+    // background.height = HEIGHT;
+    // app?.stage.addChild(background);
+
     // 横着的道路
     createRoad({
       app,
@@ -308,6 +335,9 @@ function App() {
     });
   };
 
+  /**
+   * 加载图片资源
+   */
   const loaderResources = () => {
     const loaders = new PIXI.Loader();
     loaders
@@ -354,7 +384,7 @@ function App() {
     let sprite = new PIXI.Sprite(
       texture![direction][Math.floor(Math.random() * 2)]
     ) as Sprite;
-    sprite.id = Math.floor(Math.random() * 999999);
+    carFilterColor(sprite);
     sprite.speed = !carData.current[direction]
       ? Math.random() * 1 + 3
       : 1 + Math.random() * 3;
@@ -563,8 +593,9 @@ function App() {
       }}
     >
       <div className={styles.app}>
-        <div>
+        <div className={styles.canvasMain}>
           <canvas id="mainCanvas"></canvas>
+          <ControlPanel />
         </div>
       </div>
     </ContextData.Provider>

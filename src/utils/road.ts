@@ -30,6 +30,10 @@ interface RoadLightParams {
   dispatch: any;
 }
 
+interface CreateGround {
+  url: string;
+}
+
 /**
  * 创建道路
  * @param param0
@@ -168,6 +172,22 @@ export const createLights = ({
       position: direction,
       dispatch,
       lightAlpha,
+    });
+  });
+};
+
+/**
+ * 加载路面
+ */
+export const createGround = ({
+  url,
+}: CreateGround): Promise<PIXI.Texture<PIXI.Resource>> => {
+  return new Promise((resolve) => {
+    const loaders = new PIXI.Loader();
+    loaders.add([url]);
+    loaders.load();
+    loaders.onComplete.add(() => {
+      resolve(loaders.resources[url].texture!);
     });
   });
 };

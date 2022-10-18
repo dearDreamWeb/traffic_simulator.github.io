@@ -1,16 +1,21 @@
 import { createContext } from 'react';
 import * as PIXI from 'pixi.js';
 
-export interface InitData {
+export interface StateProps {
   lightsData: Array<PIXI.Container<PIXI.DisplayObject>>;
+  app: PIXI.Application | null;
 }
 //初始数据
-const initData: InitData = {
+const initData: StateProps = {
   lightsData: [],
+  app: null,
 };
 
 // 派发事件
-const reducer = (state: any, action: any) => {
+const reducer = (
+  state: StateProps,
+  action: { type: string; payload?: any }
+) => {
   switch (action.type) {
     case 'addLight':
       return { ...state, lightsData: [...state.lightsData, action.payload] };
