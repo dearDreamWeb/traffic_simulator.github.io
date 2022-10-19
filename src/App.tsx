@@ -69,7 +69,7 @@ type Direction = 'left' | 'right' | 'top' | 'bottom';
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initData);
-  const { app } = state as StateProps;
+  const { app, carFilterType } = state as StateProps;
   let isRowGreen = useRef(true);
   let timerCount = useRef(0).current;
   let [texture, setTexture] = useState<TextureCacheObj>();
@@ -81,6 +81,7 @@ function App() {
     bottom: null,
   });
   let carContainer = useRef(new PIXI.Container());
+  let type = useRef(carFilterType);
 
   useEffect(() => {
     let _app = new PIXI.Application({
@@ -93,6 +94,10 @@ function App() {
     });
     dispatch({ type: 'updateState', payload: { app: _app } });
   }, []);
+
+  useEffect(() => {
+    type.current = carFilterType;
+  }, [carFilterType]);
 
   useEffect(() => {
     if (!app) {
@@ -216,7 +221,7 @@ function App() {
         let lastNode = null;
         while (copyList) {
           const sprite = copyList.val;
-
+          type.current !== 1 && carFilterColor(sprite, type.current);
           // 是否停车
           let isStop = false;
           // 判断是否在红绿灯 5 距离大小，在判断是否为红灯
@@ -395,7 +400,7 @@ function App() {
     let sprite = new PIXI.Sprite(
       texture![direction][Math.floor(Math.random() * 2)]
     ) as Sprite;
-    carFilterColor(sprite);
+    carFilterColor(sprite, type.current);
     sprite.speed = !carData.current[direction]
       ? Math.random() * 1 + 3
       : 1 + Math.random() * 3;

@@ -1,24 +1,49 @@
-.main{
+.main {
     position: absolute;
     width: 100%;
     height: 100%;
     left: 0;
     top: 0;
-    .rightContent{
+    .leftContent {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+        color: #fff;
+        .title {
+            margin-bottom: 16px;
+            font-size: 30px;
+        }
+        .radioMain {
+            display: flex;
+            li {
+                display: flex;
+                align-items: center;
+                margin-right: 8px;
+                input {
+                    margin-right: 4px;
+                    cursor: pointer;
+                }
+                label{
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+    .rightContent {
         position: absolute;
         right: 20px;
         top: 20px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        .statsMain{
+        .statsMain {
           box-shadow: 0 0 1px #fff;
           margin-bottom: 12px;
         }
-        .playBtn{
+        .playBtn {
             cursor: pointer;
             transition: all 0.3s ease-in-out;
-            &:hover{
+            &:hover {
                 transform: scale(1.2);
             }
         }

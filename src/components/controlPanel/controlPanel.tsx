@@ -7,10 +7,7 @@ import Stats from 'stats.js';
 
 interface ContextProps {
   state: StateProps;
-  dispatch: {
-    type: string;
-    payload?: any;
-  };
+  dispatch: any;
 }
 
 export default function ControlPanel() {
@@ -18,13 +15,24 @@ export default function ControlPanel() {
   const { app } = state as StateProps;
   const [playState, setPlayState] = useState(true);
   const statsDom = useRef<HTMLDivElement>(null);
+  const [stats] = useState(new Stats());
+  const [selectIndex, setSelectIndex] = useState(0);
+
+  const carManageList = [
+    { key: '0', label: '原始模式' },
+    { key: '1', label: '多彩模式' },
+    { key: '2', label: '多彩闪光模式' },
+    { key: '3', label: '简笔画模式' },
+  ];
 
   useEffect(() => {
     initStats();
+    return () => {
+      stats.dom.remove();
+    };
   }, []);
 
   const initStats = () => {
-    let stats = new Stats();
     stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
     stats.dom.style.position = 'relative';
     statsDom.current!.appendChild(stats.dom);
@@ -46,6 +54,12 @@ export default function ControlPanel() {
     }
     setPlayState(!playState);
   };
+
+  const selectTypeHandler = (index: number) => {
+    setSelectIndex(index);
+    dispatch({ type: 'updateState', payload: { carFilterType: index } });
+  };
+
   return (
     <div className={styles.main}>
       <div className={styles.rightContent}>
@@ -59,6 +73,25 @@ export default function ControlPanel() {
           height={50}
           onClick={playBtnClick}
         />
+      </div>
+      <div className={styles.leftContent}>
+        <h1 className={styles.title}>车辆管理</h1>
+        <ul className={styles.radioMain}>
+          {carManageList.map((item, index) => {
+            return (
+              <li key={item.key} onClick={() => selectTypeHandler(index)}>
+                <input
+                  type="radio"
+                  name="radio"
+                  id={`radio_${index}`}
+                  value={index}
+                  checked={selectIndex === index}
+                />
+                <label htmlFor={`radio_${index}`}>{item.label}</label>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </div>
   );
