@@ -19,7 +19,8 @@ import catGrayTop from './assets/images/cart_gray_top.png';
 import catGrayBottom from './assets/images/cart_gray_bottom.png';
 // import ground from './assets/images/road.jpg';
 
-const { createRoad, roadLine, createLights, carFilterColor } = utils;
+const { createRoad, roadLine, createLights, carFilterColor, createRoadArrow } =
+  utils;
 
 interface TextureCacheObj {
   left: PIXI.Texture<PIXI.Resource>[];
@@ -72,12 +73,14 @@ function App() {
   let isRowGreen = useRef(true);
   let timerCount = useRef(0).current;
   let [texture, setTexture] = useState<TextureCacheObj>();
+  let [resourceLoaded, setResourceLoaded] = useState(false);
   let carData = useRef<CarData>({
     left: null,
     right: null,
     top: null,
     bottom: null,
   });
+  let carContainer = useRef(new PIXI.Container());
 
   useEffect(() => {
     let _app = new PIXI.Application({
@@ -167,7 +170,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (!app || !texture) {
+    if (!app || !texture || !resourceLoaded) {
       return;
     }
     addCar('left');
@@ -186,7 +189,7 @@ function App() {
     addCar('bottom');
 
     playCar();
-  }, [app, texture]);
+  }, [app, texture, resourceLoaded]);
 
   /***
    * 开始启动
@@ -324,7 +327,13 @@ function App() {
       lineSpace: 5,
       roadWidth: ROADWIDTH,
     });
-
+    // 创建道路箭头
+    await createRoadArrow({
+      app,
+      width: WIDTH,
+      height: HEIGHT,
+      roadWidth: ROADWIDTH,
+    });
     createLights({
       app,
       roadWidth: ROADWIDTH,
@@ -333,6 +342,8 @@ function App() {
       lightAlpha: LIGHTALPHA,
       dispatch,
     });
+    app.stage.addChild(carContainer.current);
+    setResourceLoaded(true);
   };
 
   /**
@@ -456,7 +467,7 @@ function App() {
       }
       carData.current[direction] = new ListNode(sprite);
     }
-    app.stage.addChild(sprite);
+    carContainer.current.addChild(sprite);
   };
 
   /**
@@ -482,7 +493,7 @@ function App() {
       return;
     }
     carData.current[direction] = carData.current[direction]!.next;
-    app?.stage.removeChild(sprite);
+    carContainer.current.removeChild(sprite);
     if (carData.current[direction]) {
       carData.current[direction]!.val.speed = Math.random() * 1 + 3;
     }

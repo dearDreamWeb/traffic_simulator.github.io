@@ -1,4 +1,6 @@
+/* eslint-disable no-async-promise-executor */
 import * as PIXI from 'pixi.js';
+import roadArrowPng from '../assets/images/road_arrow.png';
 
 interface CreateRoadParams {
   app: PIXI.Application;
@@ -34,6 +36,23 @@ interface CreateGround {
   url: string;
 }
 
+interface CreateRoadArrow {
+  app: PIXI.Application;
+  width: number;
+  height: number;
+  roadWidth: number;
+}
+
+type arrowType =
+  | 'leftRight'
+  | 'leftLeft'
+  | 'rightLeft'
+  | 'rightRight'
+  | 'topTop'
+  | 'topBottom'
+  | 'bottomBottom'
+  | 'bottomTop';
+
 /**
  * 创建道路
  * @param param0
@@ -51,6 +70,7 @@ export const createRoad = ({
   borderline.beginFill(fillColor); //填充
   borderline.drawRect(x, y, w, h); //x,y,w,h
   borderline.endFill();
+  borderline.filters = [new PIXI.filters.NoiseFilter(0.5, 0.6)];
   app.stage.addChild(borderline); //添加到舞台中
 };
 
@@ -98,6 +118,10 @@ export const roadLine = ({
   }
 };
 
+/**
+ * 交通灯
+ * @param param0
+ */
 export const roadLight = ({
   app,
   roadWidth,
@@ -177,7 +201,125 @@ export const createLights = ({
 };
 
 /**
- * 加载路面
+ * 道路箭头
+ * @param param0
+ */
+export const createRoadArrow = ({
+  app,
+  width,
+  height,
+  roadWidth,
+}: CreateRoadArrow) => {
+  return new Promise(async (resolve) => {
+    let arrowContainer = new PIXI.Container();
+    let texture = await createGround({ url: roadArrowPng });
+    let arrowHeight = roadWidth / 4;
+    let arrowWidth = arrowHeight * 3;
+    let space = 15;
+
+    let directionList: arrowType[] = [
+      'leftRight',
+      'leftLeft',
+      'rightLeft',
+      'rightRight',
+      'topTop',
+      'topBottom',
+      'bottomBottom',
+      'bottomTop',
+    ];
+    let obj: {
+      [key in arrowType]?: {
+        rotation: number;
+        x: number;
+        y: number;
+      };
+    } = {};
+    // 左箭头右
+    obj['leftRight'] = {
+      rotation: 0,
+      x: (width + roadWidth + arrowWidth) / 2 + space,
+      y: (height - roadWidth / 2) / 2,
+    };
+    // 左箭头左
+    obj['leftLeft'] = {
+      ...obj['leftRight'],
+      x: (width - roadWidth - arrowWidth) / 2 - space,
+    };
+    // 右箭头左
+    obj['rightLeft'] = {
+      ...obj['leftLeft'],
+      rotation: (Math.PI / 180) * 180,
+      y: (height + roadWidth / 2) / 2,
+    };
+    // 右箭头右
+    obj['rightRight'] = {
+      ...obj['rightLeft'],
+      x: (width + roadWidth + arrowWidth) / 2 + space,
+    };
+    // 上箭头 上
+    obj['topTop'] = {
+      rotation: (Math.PI / 180) * 90,
+      x: (width + roadWidth / 2) / 2,
+      y: (height - roadWidth - arrowWidth) / 2 - space,
+    };
+    // 上箭头 下
+    obj['topBottom'] = {
+      ...obj['topTop'],
+      y: (height + roadWidth + arrowWidth) / 2 + space,
+    };
+    // 下箭头 下
+    obj['bottomBottom'] = {
+      ...obj['topBottom'],
+      rotation: (Math.PI / 180) * 270,
+      x: (width - roadWidth / 2) / 2,
+    };
+    // 下箭头 上
+    obj['bottomTop'] = {
+      ...obj['bottomBottom'],
+      y: (height - roadWidth - arrowWidth) / 2 - space,
+    };
+    directionList.forEach((item) => {
+      arrowSprite({
+        sprite: new PIXI.Sprite(texture),
+        arrowWidth,
+        arrowHeight,
+        container: arrowContainer,
+        ...obj[item]!,
+      });
+    });
+    app.stage.addChild(arrowContainer);
+    resolve(null);
+  });
+};
+
+const arrowSprite = ({
+  sprite,
+  arrowWidth,
+  arrowHeight,
+  rotation,
+  x,
+  y,
+  container,
+}: {
+  sprite: PIXI.Sprite;
+  arrowWidth: number;
+  arrowHeight: number;
+  rotation: number;
+  x: number;
+  y: number;
+  container: PIXI.Container<PIXI.DisplayObject>;
+}) => {
+  sprite.anchor.set(0.5);
+  sprite.width = arrowWidth;
+  sprite.height = arrowHeight;
+  sprite.rotation = rotation;
+  sprite.x = x;
+  sprite.y = y;
+  container.addChild(sprite);
+};
+
+/**
+ * 加载图片
  */
 export const createGround = ({
   url,
