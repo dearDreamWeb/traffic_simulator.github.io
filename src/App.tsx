@@ -19,8 +19,14 @@ import catGrayTop from './assets/images/cart_gray_top.png';
 import catGrayBottom from './assets/images/cart_gray_bottom.png';
 // import ground from './assets/images/road.jpg';
 
-const { createRoad, roadLine, createLights, carFilterColor, createRoadArrow } =
-  utils;
+const {
+  createRoad,
+  roadLine,
+  createLights,
+  carFilterColor,
+  createRoadArrow,
+  randomRange,
+} = utils;
 
 interface TextureCacheObj {
   left: PIXI.Texture<PIXI.Resource>[];
@@ -82,6 +88,7 @@ function App() {
   });
   let carContainer = useRef(new PIXI.Container());
   let type = useRef(carFilterType);
+  let lastType = useRef<number>();
   let carList = useRef(useCarList);
 
   useEffect(() => {
@@ -97,6 +104,7 @@ function App() {
   }, []);
 
   useEffect(() => {
+    lastType.current = type.current;
     type.current = carFilterType;
   }, [carFilterType]);
 
@@ -183,20 +191,19 @@ function App() {
     if (!app || !texture || !resourceLoaded) {
       return;
     }
-    addCar('left');
-    addCar('left');
 
-    addCar('right');
-    addCar('right');
-    addCar('right');
+    let randomCar: { [key in Direction]: number } = {
+      left: randomRange(2, 8),
+      right: randomRange(2, 8),
+      top: randomRange(2, 8),
+      bottom: randomRange(2, 8),
+    };
 
-    addCar('top');
-    addCar('top');
-    addCar('top');
-
-    addCar('bottom');
-    addCar('bottom');
-    addCar('bottom');
+    for (let key in randomCar) {
+      for (let i = 0; i < randomCar[key as Direction]; i++) {
+        addCar(key as Direction);
+      }
+    }
 
     playCar();
   }, [app, texture, resourceLoaded]);
@@ -226,7 +233,9 @@ function App() {
         let lastNode = null;
         while (copyList) {
           const sprite = copyList.val;
-          type.current !== 1 && carFilterColor(sprite, type.current);
+          if (type.current !== 1 || lastType.current !== type.current) {
+            carFilterColor(sprite, type.current);
+          }
           // 是否停车
           let isStop = false;
           // 判断是否在红绿灯 5 距离大小，在判断是否为红灯
@@ -298,6 +307,7 @@ function App() {
           copyList = copyList.next;
         }
       }
+      lastType.current = type.current;
     });
   };
 
