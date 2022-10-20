@@ -6,6 +6,7 @@ module.exports = {
       "stylelint-order"
     ],
     "rules": {
+      "selector-class-pattern": [null, "kebab-case"],
       // 颜色指定大写
       "color-hex-case": "upper",
       // 禁止空块

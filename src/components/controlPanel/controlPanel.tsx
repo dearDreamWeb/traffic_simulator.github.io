@@ -92,15 +92,15 @@ export default function ControlPanel() {
         <img
           className={styles.playBtn}
           src={playState ? stopBtn : startBtn}
-          title={playState ? '暂停' : '开始'}
           alt="按钮"
           width={50}
           height={50}
           onClick={playBtnClick}
         />
+        <div className={styles.status}>{playState ? '暂停' : '继续'}</div>
       </div>
       <div className={styles.leftContent}>
-        <h1 className={styles.title}>交通模拟器 🚥，😎skr~</h1>
+        <h1 className={styles.title}>交通模拟器 🚗 🚥 ，😎skr~</h1>
         <ul className={styles.radioMain}>
           {carManageList.map((item, index) => {
             return (
