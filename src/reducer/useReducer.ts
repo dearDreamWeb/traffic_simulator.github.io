@@ -5,12 +5,14 @@ export interface StateProps {
   lightsData: Array<PIXI.Container<PIXI.DisplayObject>>;
   app: PIXI.Application | null;
   carFilterType: number;
+  useCarList: number[];
 }
 //初始数据
 const initData: StateProps = {
   lightsData: [],
   app: null,
   carFilterType: 0,
+  useCarList: [0, 1],
 };
 
 // 派发事件

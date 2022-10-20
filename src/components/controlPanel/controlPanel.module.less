@@ -1,51 +1,99 @@
 .main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  .leftContent {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    .leftContent {
-        position: absolute;
-        left: 20px;
-        top: 20px;
-        color: #fff;
-        .title {
-            margin-bottom: 16px;
-            font-size: 30px;
-        }
-        .radioMain {
-            display: flex;
-            li {
-                display: flex;
-                align-items: center;
-                margin-right: 8px;
-                input {
-                    margin-right: 4px;
-                    cursor: pointer;
-                }
-                label{
-                    cursor: pointer;
-                }
-            }
-        }
+    top: 20px;
+    left: 20px;
+    color: #FFFFFF;
+
+    .title {
+      margin-bottom: 24px;
+      font-size: 30px;
     }
-    .rightContent {
-        position: absolute;
-        right: 20px;
-        top: 20px;
+
+    .radioMain {
+      display: flex;
+
+      li {
         display: flex;
-        flex-direction: column;
         align-items: center;
-        .statsMain {
-          box-shadow: 0 0 1px #fff;
-          margin-bottom: 12px;
+        margin-right: 8px;
+
+        input {
+          margin-right: 4px;
+          cursor: pointer;
         }
-        .playBtn {
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-            &:hover {
-                transform: scale(1.2);
-            }
+
+        label {
+          cursor: pointer;
         }
+      }
     }
+
+    .subTitle {
+      margin: 16px 0;
+      font-size: 24px;
+      span{
+        font-size: 14px;
+      }
+    }
+
+    .carList {
+      li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+
+        .useBtn {
+          margin-right: 8px;
+          cursor: pointer;
+          transition: all 0.3s ease-out;
+          &.disabled{
+            color: #fff;
+            background-color: #f56c6c;
+            border-color: #f56c6c;
+          }
+          &.use{
+            color: #fff;
+            background-color: #67c23a;
+            border-color: #67c23a;
+          }
+          &:disabled{
+            color: #fff;
+            background-color: #c8c9cc;
+            border-color: #c8c9cc;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+  }
+
+  .rightContent {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+
+    .statsMain {
+      margin-bottom: 12px;
+      box-shadow: 0 0 1px #FFFFFF;
+    }
+
+    .playBtn {
+      cursor: pointer;
+      transition: all .3s ease-in-out;
+
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
+  }
 }

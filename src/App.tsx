@@ -69,7 +69,7 @@ type Direction = 'left' | 'right' | 'top' | 'bottom';
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initData);
-  const { app, carFilterType } = state as StateProps;
+  const { app, carFilterType, useCarList } = state as StateProps;
   let isRowGreen = useRef(true);
   let timerCount = useRef(0).current;
   let [texture, setTexture] = useState<TextureCacheObj>();
@@ -82,6 +82,7 @@ function App() {
   });
   let carContainer = useRef(new PIXI.Container());
   let type = useRef(carFilterType);
+  let carList = useRef(useCarList);
 
   useEffect(() => {
     let _app = new PIXI.Application({
@@ -98,6 +99,10 @@ function App() {
   useEffect(() => {
     type.current = carFilterType;
   }, [carFilterType]);
+
+  useEffect(() => {
+    carList.current = useCarList;
+  }, [useCarList]);
 
   useEffect(() => {
     if (!app) {
@@ -300,13 +305,6 @@ function App() {
     if (!app) {
       return;
     }
-    // 加载地面
-    // let backgroundTexture = await createGround({ url: ground });
-    // let background = new PIXI.Sprite(backgroundTexture);
-    // background.width = WIDTH;
-    // background.height = HEIGHT;
-    // app?.stage.addChild(background);
-
     // 横着的道路
     createRoad({
       app,
@@ -397,9 +395,14 @@ function App() {
     if (!app) {
       return;
     }
-    let sprite = new PIXI.Sprite(
-      texture![direction][Math.floor(Math.random() * 2)]
-    ) as Sprite;
+    let carIndex =
+      carList.current.length > 1
+        ? Math.floor(Math.random() * 2)
+        : carList.current[0];
+    if (typeof carIndex !== 'number') {
+      return;
+    }
+    let sprite = new PIXI.Sprite(texture![direction][carIndex]) as Sprite;
     carFilterColor(sprite, type.current);
     sprite.speed = !carData.current[direction]
       ? Math.random() * 1 + 3

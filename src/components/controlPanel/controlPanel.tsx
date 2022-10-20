@@ -4,26 +4,41 @@ import startBtn from '../../assets/images/start_btn1.png';
 import stopBtn from '../../assets/images/stop_btn.png';
 import { ContextData, StateProps } from '../../reducer/useReducer'; //引入useReducer文件
 import Stats from 'stats.js';
+import cartYellowLeft from '../../assets/images/cart_yellow_left.png';
+import cartGrayLeft from '../../assets/images/cart_gray_left.png';
 
 interface ContextProps {
   state: StateProps;
   dispatch: any;
 }
+const carManageList = [
+  { key: '0', label: '原始模式' },
+  { key: '1', label: '多彩模式' },
+  { key: '2', label: '多彩闪光模式' },
+  { key: '3', label: '简笔画模式' },
+];
+
+const carListDefault = [
+  {
+    key: '0',
+    url: cartYellowLeft,
+    disabled: false,
+  },
+  {
+    key: '1',
+    url: cartGrayLeft,
+    disabled: false,
+  },
+];
 
 export default function ControlPanel() {
   const { state, dispatch } = useContext(ContextData) as ContextProps;
-  const { app } = state as StateProps;
+  const { app, useCarList } = state as StateProps;
   const [playState, setPlayState] = useState(true);
   const statsDom = useRef<HTMLDivElement>(null);
   const [stats] = useState(new Stats());
   const [selectIndex, setSelectIndex] = useState(0);
-
-  const carManageList = [
-    { key: '0', label: '原始模式' },
-    { key: '1', label: '多彩模式' },
-    { key: '2', label: '多彩闪光模式' },
-    { key: '3', label: '简笔画模式' },
-  ];
+  const [carList, setCarList] = useState(carListDefault);
 
   useEffect(() => {
     initStats();
@@ -60,6 +75,16 @@ export default function ControlPanel() {
     dispatch({ type: 'updateState', payload: { carFilterType: index } });
   };
 
+  const carManage = (index: number) => {
+    const list = JSON.parse(JSON.stringify(carList));
+    list[index].disabled = !list[index].disabled;
+    let arr = list
+      .filter((item: any) => !item.disabled)
+      .map((_item: any) => Number(_item.key));
+    dispatch({ type: 'updateState', payload: { useCarList: arr } });
+    setCarList(list);
+  };
+
   return (
     <div className={styles.main}>
       <div className={styles.rightContent}>
@@ -75,7 +100,7 @@ export default function ControlPanel() {
         />
       </div>
       <div className={styles.leftContent}>
-        <h1 className={styles.title}>车辆管理</h1>
+        <h1 className={styles.title}>交通模拟器 🚥，😎skr~</h1>
         <ul className={styles.radioMain}>
           {carManageList.map((item, index) => {
             return (
@@ -88,6 +113,28 @@ export default function ControlPanel() {
                   checked={selectIndex === index}
                 />
                 <label htmlFor={`radio_${index}`}>{item.label}</label>
+              </li>
+            );
+          })}
+        </ul>
+        <h2 className={styles.subTitle}>
+          车辆管理
+          <span>（提示：至少要有一辆车）</span>
+        </h2>
+        <ul className={styles.carList}>
+          {carList.map((item, index) => {
+            return (
+              <li key={item.key}>
+                <button
+                  onClick={() => carManage(index)}
+                  className={`${styles.useBtn} ${
+                    item.disabled ? styles.use : styles.disabled
+                  }`}
+                  disabled={!item.disabled && useCarList.length === 1}
+                >
+                  {item.disabled ? '启用' : '禁止'}
+                </button>
+                <img src={item.url} width={60} height={30} />
               </li>
             );
           })}
