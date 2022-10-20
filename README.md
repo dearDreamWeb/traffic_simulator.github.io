@@ -1,10 +1,10 @@
 # 交通模拟器
-汽车的行驶以及等红绿灯的场景进行模拟，使用了pixi和webgl去实现的。  
-webgl主要是用在pixi中spite着色器的编写。
+汽车的行驶以及等红绿灯的场景进行模拟，使用了`pixi`和`webgl`去实现的。  
+webgl主要是用在pixi中spite的`着色器`的编写。
 
 # 预览
-[github预览地址](https://deardreamweb.github.io/traffic_simulator.github.io/)
-[gitee预览地址](https://flyingwxb.gitee.io/traffic_simulator.gitee.io)
+[github预览地址](https://deardreamweb.github.io/traffic_simulator.github.io/)  
+[gitee预览地址](https://flyingwxb.gitee.io/traffic_simulator.gitee.io)  
 网速慢的慢的话建议`gitee预览地址`，效果会更好
 
 # 界面
@@ -22,5 +22,5 @@ webgl主要是用在pixi中spite着色器的编写。
 - `简笔画模式`是让汽车是简笔画的形态
 这三部分是通过`pixi`的`sprite`用的`webgl`来写了一部分`sharder`完成的。
 
-车辆管理区域：
+🚗车辆管理区域：  
 目前就两款车型，可以控制道路上行驶的车辆类型，`禁用`可以让该类型的车辆不在道路上行驶，`启用`则是相反，允许该车辆行驶。
