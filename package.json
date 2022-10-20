@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint src",
     "deploy": "./deploy.sh",
+    "deployGitee": "./deployGitee.sh",
     "fix": "eslint src/**/*.*  --fix",
     "style": "stylelint \"src/**/*.*.(less|scss|css)\" --fix --custom-syntax postcss-less"
   },

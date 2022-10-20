@@ -132,7 +132,7 @@ export default function ControlPanel() {
                   }`}
                   disabled={!item.disabled && useCarList.length === 1}
                 >
-                  {item.disabled ? '启用' : '禁止'}
+                  {item.disabled ? '启用' : '禁用'}
                 </button>
                 <img src={item.url} width={60} height={30} />
               </li>
